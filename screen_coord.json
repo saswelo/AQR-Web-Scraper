@@ -1,0 +1,18 @@
+{
+    "browser_logo": {
+        "x": 2251,
+        "y": 1035
+    },
+    "browser_close": {
+        "x": 21,
+        "y": 53
+    },
+    "search_bar": {
+        "x": 350,
+        "y": 95
+    },
+    "dev_tool_console": {
+        "x": 607,
+        "y": 866
+    }
+}
