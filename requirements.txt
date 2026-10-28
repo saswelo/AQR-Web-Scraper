@@ -1,6 +1,9 @@
+ipykernel==6.30.1
 lxml_html_clean==0.4.6
+markdownify==1.2.3
 openpyxl==3.1.5
 pandas==2.3.3
+pickleshare==0.7.5
 pip==26.0.1
 PyAutoGUI==0.9.54
 setuptools==80.9.0

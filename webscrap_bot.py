@@ -9,6 +9,8 @@ import os
 import json
 import trafilatura
 from tqdm import tqdm
+from bs4 import BeautifulSoup
+from markdownify import markdownify as md
 
 pyautogui.FAILSAFE = True   # Move mouse to top-left corner to abort
 pyautogui.PAUSE = 0.4       # Small delay between every pyautogui call
@@ -138,7 +140,7 @@ def main(screen_coord_file:str, land_pages_fname:str, op_system:str) -> None:
         click_element_at(screen_coords['search_bar'],mouse_move_duration=0.5) # click at search bar
         paste_text(op_system)
         pyautogui.press("enter")
-        time.sleep(7.0)
+        time.sleep(15.0)
 
         # Open devtool console
         open_close_dev_tool_console(op_system)
@@ -152,7 +154,12 @@ def main(screen_coord_file:str, land_pages_fname:str, op_system:str) -> None:
         pyautogui.press("enter")
         time.sleep(0.5)
         rend_html = pyperclip.paste()
-        lp_content_markdown = trafilatura.extract(rend_html,output_format="markdown",include_links=True,include_tables=True,include_images=False)
+
+        # lp_content_markdown = trafilatura.extract(rend_html,output_format="markdown",include_links=True,include_tables=True,include_images=False)
+        soup = BeautifulSoup(rend_html, "lxml")
+        for tag in soup(["script", "style", "noscript", "svg", "iframe", "nav", "footer", "form"]):
+            tag.decompose()
+        lp_content_markdown = md(str(soup), heading_style="ATX", strip=["img"])
 
         # Close devtool console
         open_close_dev_tool_console(op_system)
