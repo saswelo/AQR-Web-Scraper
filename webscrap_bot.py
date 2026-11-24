@@ -92,7 +92,7 @@ def screen_coord_validator(coords:dict) -> bool:
 
     return len(error_msgs) == 0
 
-def main(screen_coord_file:str, land_pages_fname:str, op_system:str) -> None:
+def main(screen_coord_file:str, land_pages_fname:str, op_system:str, save_dir:str) -> None:
     '''
     DESCRIPTION
 
@@ -143,14 +143,20 @@ def main(screen_coord_file:str, land_pages_fname:str, op_system:str) -> None:
         time.sleep(15.0)
 
         # Open devtool console
-        open_close_dev_tool_console(op_system)
-        time.sleep(0.5)
+        if i == 0:
+            open_close_dev_tool_console(op_system)
+            time.sleep(0.5)
+
+        # Click at dev tool console to ensure copy-command is typed in it
+        click_element_at(screen_coords['dev_tool_console_tab'],mouse_move_duration=0.5)
 
         # Click at dev tool console to ensure copy-command is typed in it
         click_element_at(screen_coords['dev_tool_console'],mouse_move_duration=0.5)
 
         # Copy rendered HTML
-        pyautogui.typewrite('copy(document.documentElement.outerHTML)', interval=0.03)
+        pyperclip.copy('copy(document.documentElement.outerHTML)')
+        paste_text(op_system)
+        # pyautogui.typewrite('copy(document.documentElement.outerHTML)', interval=0.03)
         pyautogui.press("enter")
         time.sleep(0.5)
         rend_html = pyperclip.paste()
@@ -162,8 +168,8 @@ def main(screen_coord_file:str, land_pages_fname:str, op_system:str) -> None:
         lp_content_markdown = md(str(soup), heading_style="ATX", strip=["img"])
 
         # Close devtool console
-        open_close_dev_tool_console(op_system)
-        time.sleep(0.5)
+        # open_close_dev_tool_console(op_system)
+        # time.sleep(0.5)
 
         data['LP content'].append(lp_content_markdown)
         data['LP scrapping succeeded'].append('True')
@@ -174,7 +180,7 @@ def main(screen_coord_file:str, land_pages_fname:str, op_system:str) -> None:
     print('>> Done')
 
     # Save landing-page-extended spreadsheet
-    fname = 'AQR_data_with_LP_content.xlsx'
+    fname = os.path.join(save_dir,'AQR_data_with_LP_content.xlsx')
     ext_df = pd.concat([df, pd.DataFrame(data)], axis=1)
     ext_df.to_excel(fname,index=False,engine_kwargs={"options": {"strings_to_urls": False}})
     print('>> Saved landing page content in '+fname)
@@ -186,6 +192,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--sample', action='store_true', help="Enable coordinates sampling mode")
     parser.add_argument("-ef", "--excel_file", default="None", help="Excel file produced by prepare_raw_data.ipynb script.")
     parser.add_argument("-os", "--operating_system", default="None", help="Operating system in which this script will be executed: < ios | linux | windows >.")
+    parser.add_argument("-sd", "--save_dir", default=".", help="Directory where the landing-page sheet will be saved.")
     args = parser.parse_args()
 
     # Sample screen coordinates
@@ -196,4 +203,4 @@ if __name__ == "__main__":
         get_coordinates_pyautogui(screen_coords,args.screen_coord_file)
     # Scrap landing pages content
     else:
-        main(args.screen_coord_file,args.excel_file,args.operating_system)
+        main(args.screen_coord_file,args.excel_file,args.operating_system,args.save_dir)
